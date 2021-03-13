@@ -14,7 +14,7 @@ func HandleError(err error) {
 	}
 }
 
-// Allow all origins access, since the back-end application will not be accessible by the outside world.
+// Allow all origins access
 // https://stackoverflow.com/questions/29418478/go-gin-framework-cors
 func HandleCorsMiddleware(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
