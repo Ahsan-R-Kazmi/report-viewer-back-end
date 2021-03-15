@@ -298,6 +298,58 @@ func GetReportListForSearchTerm(searchTerm string) []EsReport {
 	return reportList
 }
 
+func DoesReportWithIdExist(id int64) bool {
+	// Check that a connection to the database can be opened.
+	err := db.Ping()
+	HandleError(err)
+
+	row := db.QueryRow(`SELECT COUNT(*) FROM report WHERE id = $1`, id)
+
+	var count int64
+	err = row.Scan(&count)
+	HandleError(err)
+
+	if count > 0 {
+		return true
+	}
+
+	return false
+}
+
+func GetAllTagList() []Tag {
+	// Check that a connection to the database can be opened.
+	err := db.Ping()
+	HandleError(err)
+
+	rows, err := db.Query(`SELECT id, name, color FROM tag`)
+	HandleError(err)
+
+	defer rows.Close()
+
+	var tagList []Tag
+	for rows.Next() {
+		var id int64
+		var name string
+		var color string
+
+		err := rows.Scan(&id, &name, &color)
+		HandleError(err)
+
+		tag := Tag{
+			id,
+			name,
+			color,
+		}
+
+		tagList = append(tagList, tag)
+	}
+
+	err = rows.Err()
+	HandleError(err)
+
+	return tagList
+}
+
 func GetReportTagListByReportId(id int64) []ReportTag {
 	// Check that a connection to the database can be opened.
 	err := db.Ping()
@@ -341,29 +393,64 @@ func GetReportTagListByReportId(id int64) []ReportTag {
 	return reportTagList
 }
 
-func DoesReportWithIdExist(id int64) bool {
+// This function will get all the tags not assigned to the report.
+func GetUnassignedTagsByReportId(reportId int64) []Tag {
 	// Check that a connection to the database can be opened.
 	err := db.Ping()
 	HandleError(err)
 
-	row := db.QueryRow(`SELECT COUNT(*) FROM report WHERE id = $1`, id)
-
-	var count int64
-	err = row.Scan(&count)
+	rows, err := db.Query(`SELECT id, name, color FROM tag AS t 
+    							LEFT JOIN report_tag AS rt on t.id = rt.tag_id AND rt.report_id = $1 
+								WHERE rt.report_id IS NULL`, reportId)
 	HandleError(err)
 
-	if count > 0 {
-		return true
+	defer rows.Close()
+
+	var unassignedTagList []Tag
+	for rows.Next() {
+		var id int64
+		var name string
+		var color string
+
+		err := rows.Scan(&id, &name, &color)
+		HandleError(err)
+
+		tag := Tag{
+			id,
+			name,
+			color,
+		}
+
+		unassignedTagList = append(unassignedTagList, tag)
 	}
 
-	return false
+	err = rows.Err()
+	HandleError(err)
+
+	return unassignedTagList
+}
+
+// This function will get the tags assigned to the report as well as the tags not assigned to the report.
+func GetReportTagsAndUnassignedTagsByReportId(reportId int64) ([]ReportTag, []Tag) {
+	tagList := GetAllTagList()
+	reportTagList := GetReportTagListByReportId(reportId)
+	reportTagMap := make(map[int64]ReportTag)
+
+	for _, reportTag := range reportTagList {
+		reportTagMap[reportTag.Id] = reportTag
+	}
+
+	var unassignedTagList []Tag
+	for _, tag := range tagList {
+		if _, exists := reportTagMap[tag.Id]; !exists {
+			unassignedTagList = append(unassignedTagList, tag)
+		}
+	}
+
+	return reportTagList, unassignedTagList
 }
 
 func UpdateReportTagListByReportId(reportId int64, clientReportTagList []ReportTag) {
-	// Check that a connection to the database can be opened.
-	err := db.Ping()
-	HandleError(err)
-
 	clientReportTagMap := make(map[int64]ReportTag)
 	for _, reportTag := range clientReportTagList {
 		clientReportTagMap[reportTag.Id] = reportTag

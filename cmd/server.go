@@ -32,6 +32,7 @@ func main() {
 		reportApiV1.GET("/getReportList", HandleGetReportList)
 		reportApiV1.GET("/getReport/:id", HandleGetReport)
 		reportApiV1.GET("/getReportTags/:id", HandleGetReportTags)
+		reportApiV1.GET("/getReportTagLists/:id", HandleGetReportTagLists)
 		reportApiV1.PUT("/updateReportTags/:id", HandleUpdateReportTags)
 	}
 
@@ -175,6 +176,53 @@ func HandleUpdateReportTags(c *gin.Context) {
 
 	internal.UpdateReportTagListByReportId(id, clientReportTagList)
 
-	c.String(http.StatusOK, "Successfully updated the reports tags.")
+	successMessage := "Successfully updated the reports tags."
+	log.Println(successMessage)
+	c.String(http.StatusOK, successMessage)
+	return
+}
+
+// This function will return the active tags assigned to the report in one list, inactive tags assigned to to the
+// report in another list, and tags not assigned to the report in another list.
+func HandleGetReportTagLists(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in HandleGetReportTagLists after trying to get the active, "+
+				"inactive, and unassigned tags for the report."+
+				"The following error was encountered: ", r)
+
+			c.String(http.StatusInternalServerError, fmt.Sprintf("Error in getting report tags."))
+			return
+		}
+	}()
+
+	idString := c.Param("id")
+	id, err := strconv.ParseInt(idString, 10, 64)
+	internal.HandleError(err)
+	log.Printf("HandleGetReportTagLists attempting to get the active, inactive, and unassigned"+
+		" tags for the report with id = %d.\n", id)
+
+	reportTagList := internal.GetReportTagListByReportId(id)
+	unassignedTagList := internal.GetUnassignedTagsByReportId(id)
+
+	var activeReportTagList []internal.ReportTag
+	var inactiveReportTagList []internal.ReportTag
+
+	for _, reportTag := range reportTagList {
+		if reportTag.Active {
+			activeReportTagList = append(activeReportTagList, reportTag)
+		} else {
+			inactiveReportTagList = append(inactiveReportTagList, reportTag)
+		}
+	}
+
+	jsonObject := make(map[string]interface{})
+	jsonObject["activeTagList"] = activeReportTagList
+	jsonObject["inactiveTagList"] = inactiveReportTagList
+	jsonObject["unassignedTagList"] = unassignedTagList
+
+	log.Println("Returning response with tags for report.")
+
+	c.JSON(http.StatusOK, jsonObject)
 	return
 }
