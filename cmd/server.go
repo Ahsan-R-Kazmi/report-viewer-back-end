@@ -36,7 +36,7 @@ func main() {
 		reportApiV1.PUT("/updateReportTags/:id", HandleUpdateReportTags)
 	}
 
-	log.Fatal(router.Run(":8081"))
+	log.Fatal(router.Run(":8080"))
 }
 
 func HandleGetAllReportList(c *gin.Context) {
