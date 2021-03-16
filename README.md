@@ -89,7 +89,9 @@ The database properties in the Go project are located in `segmed-demo-back-end/i
    ```go mod init segmed-demo-back-end && go mod tidy```
 4. The project can then be run:<br />
    `go run cmd/server.go`
+   <br/>
    If you want to run it in the background use nohup e.g.:<br />
    `nohup go run cmd/server.go &`.
+   <br/>
    (Conversely, you can use `go build` to create the binary and run that instead.)
    
