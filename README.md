@@ -14,6 +14,8 @@ This project uses Elasticsearch version `7.11.2`. The download page and instruct
 This project uses PostgreSQL version `13.0`. The download page and instructions can be found here:
 https://www.postgresql.org/download/.
 
+First, create the `segmed` database and then run the following scripts.
+
 The following scripts must be run to create the tables required and insert some sample tag data. These scripts must be run prior to starting the app.
 ```
 create table report
