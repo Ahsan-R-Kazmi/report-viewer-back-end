@@ -82,14 +82,14 @@ INSERT INTO tag(name, color) VALUES ('Non-fiction', '#FFFF00');
 The database properties in the Go project are located in `segmed-demo-back-end/internal/db.go`.
 
 ## Starting the Application
-1. Clone `segmed-demo-back-end` project into your `$HOME/go` directory:
+1. Clone `segmed-demo-back-end` project into your `$HOME/go` directory:<br />
    `git clone https://github.com/Ahsan-R-Kazmi/segmed-demo-back-end.git`
-2. After cloning completes enter the project directory (i.e. `cd segmed-demo-back-end/`).
-3. Initialize the project with a go module and then add any dependencies needed:
+2. After cloning completes, enter the project directory (i.e. `cd segmed-demo-back-end/`).
+3. Initialize the project with a go module and then add any dependencies needed:<br />
    ```go mod init segmed-demo-back-end && go mod tidy```
-4. The project can then be run:
+4. The project can then be run:<br />
    `go run cmd/server.go`
-   If you want to run it in the background use nohup e.g.:
+   If you want to run it in the background use nohup e.g.:<br />
    `nohup go run cmd/server.go &`.
    (Conversely, you can use `go build` to create the binary and run that instead.)
    
