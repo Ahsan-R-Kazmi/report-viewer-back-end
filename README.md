@@ -1,4 +1,4 @@
-# Segmed Demo Back-end
+# Report Viewer Back-end
 
 This is the back-end of the demo project. It uses Go, PostgreSQL, and Elasticsearch. The reports are saved in PostgreSQL to keep track of the tags and also in Elasticsearch to allow for efficient full-text search of the entirety of the text.
 
